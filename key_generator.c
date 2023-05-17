@@ -9,7 +9,7 @@ void generate_keys(int key_count){
     }
     
     for(int i = 1; i<=key_count; i++){
-        fprintf(file, "%010d", i);
+        fprintf(file, "%d ", i);
     }
     fclose(file);
 }

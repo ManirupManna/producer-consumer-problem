@@ -1,18 +1,19 @@
+
 #ifndef DATA_H
 #define DATA_H
-
+#include <time.h>
 
 typedef struct
 {
     int key;
     int producer_pid;
     int serial_number;
-    long long time_produced;
-    long long time_consumed;
-    
+    time_t time_produced;
 } Data;
 
-Data produce_data(int serial_no, int key, int producer_pid, int time_produced);
+Data produce_data(int serial_no, int key, int producer_pid);
+
+void consume_data(Data* d, FILE* file);
 
 void print_data(const Data* d);
 

@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-
 #include "shared_memory.h"
 SharedMemory* create_shared_memory(){
     int shmid;
@@ -30,5 +29,8 @@ SharedMemory* create_shared_memory(){
         perror("shmat");
         return NULL;
     }
+    shm->producer_index = 0;
+    shm->consumer_index = 0;
+    shm->all_data_consumed = 0;
     return shm;
 }
