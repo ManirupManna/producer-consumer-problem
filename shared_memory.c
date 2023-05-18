@@ -31,6 +31,5 @@ SharedMemory* create_shared_memory(){
     }
     shm->producer_index = 0;
     shm->consumer_index = 0;
-    shm->all_data_consumed = 0;
     return shm;
 }

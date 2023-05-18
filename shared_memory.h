@@ -15,8 +15,7 @@ typedef struct {
     unsigned int producer_index;
     unsigned int consumer_index;
     unsigned int size;
-    unsigned int all_data_consumed; // 0-> MORE DATA TO BE CONSUMED, 1-> ALL DATA HAS BEEN CONSUMED
-    unsigned int items_to_produce;
+    unsigned int itemCount; // total number of data to be processed
 } SharedMemory;
 
 SharedMemory* create_shared_memory();

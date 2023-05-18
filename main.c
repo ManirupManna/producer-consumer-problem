@@ -25,7 +25,7 @@ void producer(SharedMemory* shm);
 void consumer(SharedMemory* shm);
 
 int main(int argc, char* argv[]) {
-    unsigned int key_count = 1000;
+    unsigned int key_count = 10000;
     unsigned int buffer_size = 1024;
     //ASSIGN VALUES TO KEY_COUNT, BUFFER_SIZE
     if(argc==2)
@@ -48,6 +48,7 @@ int main(int argc, char* argv[]) {
     //CREATE SHARED MEMORY
     SharedMemory* shm = create_shared_memory();
     shm->size = BUFFER_SIZE;
+    shm->itemCount = key_count;
     //CREATE PRODUCER PROCESS (pending)
     pid_t p2 = fork();
     if(p2==0){
@@ -124,7 +125,6 @@ void producer(SharedMemory* shm){
         serial_no++;
         i++;
     }
-    shm->all_data_consumed = 1;
     munmap(file_data, file_size);
     close(file_descriptor);
 }
@@ -144,9 +144,9 @@ void consumer(SharedMemory* shm){
         exit(1);
     }
     int consumed_item_count = 0;
-    while(shm->all_data_consumed==0)
+    while(consumed_item_count < shm->itemCount)
     {
-        while(shm->buffer[shm->consumer_index].serial_number==0 && shm->all_data_consumed==0) //if the consumer index is empty wait
+        while(shm->buffer[shm->consumer_index].serial_number==0) //if the consumer index is empty wait
         {
             usleep(SLEEP_TIME*1000);
             continue;
