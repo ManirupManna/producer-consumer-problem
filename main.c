@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include<string.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <stdlib.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -18,14 +16,15 @@
 #include "key_generator.h"
 #include "shared_memory.h"
 
-#define BUFFER_SIZE 1024
-#define SLEEP_TIME 100 //in miliseconds
+#define BUFFER_SIZE 10
+#define SLEEP_TIME 10 //in miliseconds
 
 void producer(SharedMemory* shm);
 void consumer(SharedMemory* shm);
+void verifier();
 
 int main(int argc, char* argv[]) {
-    unsigned int key_count = 10000;
+    unsigned int key_count = 100;
     unsigned int buffer_size = 1024;
     //ASSIGN VALUES TO KEY_COUNT, BUFFER_SIZE
     if(argc==2)
@@ -63,6 +62,7 @@ int main(int argc, char* argv[]) {
     }
     waitpid(p2, NULL, 0);
     waitpid(p3, NULL, 0);
+    verifier();
     /*
     pid_t p2 = fork();
     if(p2==0)
@@ -131,14 +131,7 @@ void producer(SharedMemory* shm){
 
 void consumer(SharedMemory* shm){
     //OPENING THE LOG FILE for maintaing the record (.json file)
-    FILE* file1 = fopen("LOG.json", "w");
-    if(file1==NULL){
-        perror("Unable to open LOG file.\n");
-        exit(1);
-    }
-    fprintf(file1, "[");
-    fclose(file1);
-    FILE * file = fopen("LOG.json", "a");
+    FILE * file = fopen("LOG.bin", "wb");
     if(file==NULL){
         perror("Unable to open the LOG file.\n");
         exit(1);
@@ -156,19 +149,36 @@ void consumer(SharedMemory* shm){
         shm->consumer_index = index;
         consumed_item_count++;
     }
-    fprintf(file, "]");
     fclose(file);
 }
-/*
-COMPILE
-gcc main.c key_generator.c data.c -o program 
-EXECUTE
-./program
-*/
+//VERIFIER CHECKS IF PRODUCER CONSUMER OPERATIONS HAD BEEN VALID OR NOT
+//right now verifier just reads the file that had been written by consumer
 
-/*
-Data d = produce_data(0, 1, 101, 100000);
-    print_data(&d);
-    printf("%i %i %i %lld\n", d.serial_number, d.key, d.producer_pid, d.time_produced);
-    return 0;
-*/
+void verifier(){ 
+    int file = open("LOG.bin", O_RDONLY);
+    if(file==-1)
+    {
+        perror("Failed to open the file");
+        exit(1);
+    }
+    struct stat file_info;
+    if(fstat(file, &file_info)==-1){
+        perror("Unable to get file information");
+        exit(1);
+    }
+    off_t file_size = file_info.st_size;
+    Data* file_data = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, file, 0);
+    if(file_data==(Data*)MAP_FAILED){
+        perror("Unable to map the file into memory");
+        close(file);
+        exit(1);
+    }
+    off_t index = 0;
+    off_t size = file_size/sizeof(Data);
+    while(index<size){
+        // file_data[index];
+        print_data(&file_data[index]);
+        index++;
+    }
+    close(file);
+}

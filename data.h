@@ -9,6 +9,7 @@ typedef struct
     int producer_pid;
     int serial_number;
     time_t time_produced;
+    time_t time_consumed;
 } Data;
 
 Data produce_data(int serial_no, int key, int producer_pid);

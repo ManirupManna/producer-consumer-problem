@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 #include "data.h"
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 10
 typedef struct {
     Data buffer[BUFFER_SIZE];
     unsigned int producer_index;
